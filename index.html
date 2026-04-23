@@ -1,194 +1,163 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rock, Paper, Scissors</title>
+  <meta charset="UTF-8">
+  <title>Rock Paper Scissors Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
+  <style>
     body {
-        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-        background: #0f172a;
-        color: white;
-        margin: 0;
-        padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px;
     }
 
-    .app {
-        max-width: 420px;
-        margin: auto;
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     h1 {
-        text-align: center;
-        margin-bottom: 10px;
+      text-align: center;
+      margin-bottom: 20px;
     }
 
-    .card {
-        background: #1e293b;
-        padding: 15px;
-        border-radius: 16px;
-        margin-bottom: 15px;
-    }
-
-    select, input {
-        width: 100%;
-        padding: 12px;
-        margin-top: 8px;
-        border-radius: 10px;
-        border: none;
-        font-size: 16px;
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
     }
 
     button {
-        width: 100%;
-        padding: 14px;
-        margin-top: 10px;
-        border: none;
-        border-radius: 12px;
-        background: #3b82f6;
-        color: white;
-        font-size: 18px;
-        font-weight: bold;
-        cursor: pointer;
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
     }
 
-    button:active {
-        transform: scale(0.98);
+    button:hover {
+      background: #0056b3;
     }
 
-    .player {
-        background: #334155;
-        padding: 12px;
-        border-radius: 12px;
-        margin-top: 8px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+    .result {
+      margin-top: 20px;
+      width: 100%;
+    }
+
+    .player-result {
+      background: #f1f1f1;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 8px;
     }
 
     .winner {
-        background: #16a34a !important;
+      background: #d4edda;
+      font-weight: bold;
     }
-
-    .result-text {
-        text-align: center;
-        margin-top: 10px;
-        font-size: 18px;
-        font-weight: bold;
-    }
-</style>
+  </style>
 </head>
 
 <body>
 
-<div class="app">
+<div class="container">
+  <h1>Rock Paper Scissors</h1>
 
-    <h1>Rock • Paper • Scissors</h1>
+  <input type="number" id="playerCount" placeholder="Number of players" min="2">
 
-    <div class="card">
-        <label>Players</label>
-        <select id="playerCount" onchange="generateInputs()">
-            <option>2</option>
-            <option>3</option>
-            <option>4</option>
-            <option>5</option>
-            <option>6</option>
-        </select>
+  <div id="players"></div>
 
-        <div id="inputs"></div>
+  <button onclick="generatePlayers()">Create Players</button>
+  <button onclick="runGame()">Run</button>
 
-        <button onclick="runGame()">Run</button>
-    </div>
-
-    <div class="card">
-        <div id="results"></div>
-        <div class="result-text" id="winnerText"></div>
-    </div>
-
+  <div class="result" id="results"></div>
 </div>
 
 <script>
-const choices = [
-    {name: "Rock", emoji: "🪨"},
-    {name: "Paper", emoji: "📄"},
-    {name: "Scissors", emoji: "✂️"}
-];
+  const choices = ["Rock", "Paper", "Scissors"];
 
-function generateInputs() {
+  function generatePlayers() {
     const count = document.getElementById("playerCount").value;
-    const container = document.getElementById("inputs");
-    container.innerHTML = "";
+    const playersDiv = document.getElementById("players");
+    playersDiv.innerHTML = "";
 
     for (let i = 0; i < count; i++) {
-        const input = document.createElement("input");
-        input.placeholder = "Player " + (i + 1);
-        input.id = "player" + i;
-        container.appendChild(input);
+      const input = document.createElement("input");
+      input.type = "text";
+      input.placeholder = "Player " + (i + 1);
+      input.className = "player-input";
+      playersDiv.appendChild(input);
     }
-}
+  }
 
-function runGame() {
-    const count = document.getElementById("playerCount").value;
+  function runGame() {
+    const playerInputs = document.querySelectorAll(".player-input");
     const resultsDiv = document.getElementById("results");
-    const winnerText = document.getElementById("winnerText");
-
     resultsDiv.innerHTML = "";
-    winnerText.innerHTML = "";
 
     let players = [];
 
-    // Assign random choices
-    for (let i = 0; i < count; i++) {
-        const name = document.getElementById("player" + i).value || "Player " + (i + 1);
-        const choice = choices[Math.floor(Math.random() * 3)];
-        players.push({name, choice: choice.name, emoji: choice.emoji});
-    }
+    playerInputs.forEach(input => {
+      const name = input.value || input.placeholder;
+      const choice = choices[Math.floor(Math.random() * 3)];
+      players.push({ name, choice });
+    });
 
-    // Determine winners
     const uniqueChoices = [...new Set(players.map(p => p.choice))];
 
     let winners = [];
 
-    if (uniqueChoices.length === 1) {
-        winnerText.innerText = "Draw! Everyone picked the same.";
-    }
-    else if (uniqueChoices.length === 3) {
-        winnerText.innerText = "Draw! All choices present.";
-    }
-    else {
-        let winningChoice;
-
-        if (uniqueChoices.includes("Rock") && uniqueChoices.includes("Scissors")) {
-            winningChoice = "Rock";
-        } else if (uniqueChoices.includes("Scissors") && uniqueChoices.includes("Paper")) {
-            winningChoice = "Scissors";
-        } else if (uniqueChoices.includes("Paper") && uniqueChoices.includes("Rock")) {
-            winningChoice = "Paper";
-        }
-
-        winners = players.filter(p => p.choice === winningChoice);
-        winnerText.innerText = winners.length > 1
-            ? "Winners: " + winners.map(w => w.name).join(", ")
-            : "Winner: " + winners[0].name;
+    if (uniqueChoices.length === 1 || uniqueChoices.length === 3) {
+      winners = []; // draw
+    } else {
+      if (uniqueChoices.includes("Rock") && uniqueChoices.includes("Scissors")) {
+        winners = players.filter(p => p.choice === "Rock");
+      }
+      if (uniqueChoices.includes("Scissors") && uniqueChoices.includes("Paper")) {
+        winners = players.filter(p => p.choice === "Scissors");
+      }
+      if (uniqueChoices.includes("Paper") && uniqueChoices.includes("Rock")) {
+        winners = players.filter(p => p.choice === "Paper");
+      }
     }
 
-    // Render results
-    players.forEach(p => {
-        const div = document.createElement("div");
-        div.className = "player";
+    players.forEach(player => {
+      const div = document.createElement("div");
+      div.className = "player-result";
 
-        if (winners.find(w => w.name === p.name)) {
-            div.classList.add("winner");
-        }
+      if (winners.includes(player)) {
+        div.classList.add("winner");
+      }
 
-        div.innerHTML = `<span>${p.name}</span><span>${p.emoji} ${p.choice}</span>`;
-        resultsDiv.appendChild(div);
+      div.innerText = player.name + " → " + player.choice;
+      resultsDiv.appendChild(div);
     });
-}
 
-// init
-generateInputs();
+    const resultText = document.createElement("div");
+
+    if (winners.length === 0) {
+      resultText.innerHTML = "<strong>It's a draw!</strong>";
+    } else {
+      const winnerNames = winners.map(w => w.name).join(", ");
+      resultText.innerHTML = "<strong>Winner: " + winnerNames + "</strong>";
+    }
+
+    resultsDiv.appendChild(resultText);
+  }
 </script>
 
 </body>
