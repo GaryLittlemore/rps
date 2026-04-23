@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rock Paper Scissors Randomiser</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            text-align: center;
+            padding: 30px;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+            margin: auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        input, select, button {
+            padding: 10px;
+            margin: 8px;
+            width: 80%;
+            font-size: 16px;
+        }
+
+        button {
+            cursor: pointer;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .result {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .player-result {
+            background: #e9ecef;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Rock Paper Scissors</h1>
+
+    <label>Number of Players:</label><br>
+    <select id="playerCount" onchange="generateInputs()">
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+    </select>
+
+    <div id="playerInputs"></div>
+
+    <button onclick="runGame()">Run</button>
+
+    <div class="result" id="results"></div>
+</div>
+
+<script>
+    const choices = ["Rock", "Paper", "Scissors"];
+
+    function generateInputs() {
+        const count = document.getElementById("playerCount").value;
+        const container = document.getElementById("playerInputs");
+
+        container.innerHTML = "";
+
+        for (let i = 0; i < count; i++) {
+            const input = document.createElement("input");
+            input.type = "text";
+            input.placeholder = "Player " + (i + 1) + " Name";
+            input.id = "player" + i;
+            container.appendChild(input);
+        }
+    }
+
+    function runGame() {
+        const count = document.getElementById("playerCount").value;
+        const resultsDiv = document.getElementById("results");
+
+        resultsDiv.innerHTML = "";
+
+        for (let i = 0; i < count; i++) {
+            const nameInput = document.getElementById("player" + i);
+            const name = nameInput.value || "Player " + (i + 1);
+            const randomChoice = choices[Math.floor(Math.random() * choices.length)];
+
+            const result = document.createElement("div");
+            result.className = "player-result";
+            result.innerHTML = `<strong>${name}</strong>: ${randomChoice}`;
+
+            resultsDiv.appendChild(result);
+        }
+    }
+
+    // Initialize inputs on load
+    generateInputs();
+</script>
+
+</body>
+</html>
