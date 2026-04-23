@@ -1,121 +1,194 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Rock Paper Scissors Randomiser</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            text-align: center;
-            padding: 30px;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RPS Randomiser</title>
 
-        h1 {
-            margin-bottom: 10px;
-        }
+<style>
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        background: #0f172a;
+        color: white;
+        margin: 0;
+        padding: 20px;
+    }
 
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            max-width: 500px;
-            margin: auto;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
+    .app {
+        max-width: 420px;
+        margin: auto;
+    }
 
-        input, select, button {
-            padding: 10px;
-            margin: 8px;
-            width: 80%;
-            font-size: 16px;
-        }
+    h1 {
+        text-align: center;
+        margin-bottom: 10px;
+    }
 
-        button {
-            cursor: pointer;
-            background: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
+    .card {
+        background: #1e293b;
+        padding: 15px;
+        border-radius: 16px;
+        margin-bottom: 15px;
+    }
 
-        button:hover {
-            background: #0056b3;
-        }
+    select, input {
+        width: 100%;
+        padding: 12px;
+        margin-top: 8px;
+        border-radius: 10px;
+        border: none;
+        font-size: 16px;
+    }
 
-        .result {
-            margin-top: 20px;
-            text-align: left;
-        }
+    button {
+        width: 100%;
+        padding: 14px;
+        margin-top: 10px;
+        border: none;
+        border-radius: 12px;
+        background: #3b82f6;
+        color: white;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+    }
 
-        .player-result {
-            background: #e9ecef;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 5px;
-        }
-    </style>
+    button:active {
+        transform: scale(0.98);
+    }
+
+    .player {
+        background: #334155;
+        padding: 12px;
+        border-radius: 12px;
+        margin-top: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .winner {
+        background: #16a34a !important;
+    }
+
+    .result-text {
+        text-align: center;
+        margin-top: 10px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+</style>
 </head>
+
 <body>
 
-<div class="container">
-    <h1>Rock, Paper or Scissors</h1>
+<div class="app">
 
-    <label>Number of Players:</label><br>
-    <select id="playerCount" onchange="generateInputs()">
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-        <option value="6">6</option>
-    </select>
+    <h1>Rock • Paper • Scissors</h1>
 
-    <div id="playerInputs"></div>
+    <div class="card">
+        <label>Players</label>
+        <select id="playerCount" onchange="generateInputs()">
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+            <option>6</option>
+        </select>
 
-    <button onclick="runGame()">Run</button>
+        <div id="inputs"></div>
 
-    <div class="result" id="results"></div>
+        <button onclick="runGame()">Run</button>
+    </div>
+
+    <div class="card">
+        <div id="results"></div>
+        <div class="result-text" id="winnerText"></div>
+    </div>
+
 </div>
 
 <script>
-    const choices = ["Rock", "Paper", "Scissors"];
+const choices = [
+    {name: "Rock", emoji: "🪨"},
+    {name: "Paper", emoji: "📄"},
+    {name: "Scissors", emoji: "✂️"}
+];
 
-    function generateInputs() {
-        const count = document.getElementById("playerCount").value;
-        const container = document.getElementById("playerInputs");
+function generateInputs() {
+    const count = document.getElementById("playerCount").value;
+    const container = document.getElementById("inputs");
+    container.innerHTML = "";
 
-        container.innerHTML = "";
+    for (let i = 0; i < count; i++) {
+        const input = document.createElement("input");
+        input.placeholder = "Player " + (i + 1);
+        input.id = "player" + i;
+        container.appendChild(input);
+    }
+}
 
-        for (let i = 0; i < count; i++) {
-            const input = document.createElement("input");
-            input.type = "text";
-            input.placeholder = "Player " + (i + 1) + " Name";
-            input.id = "player" + i;
-            container.appendChild(input);
-        }
+function runGame() {
+    const count = document.getElementById("playerCount").value;
+    const resultsDiv = document.getElementById("results");
+    const winnerText = document.getElementById("winnerText");
+
+    resultsDiv.innerHTML = "";
+    winnerText.innerHTML = "";
+
+    let players = [];
+
+    // Assign random choices
+    for (let i = 0; i < count; i++) {
+        const name = document.getElementById("player" + i).value || "Player " + (i + 1);
+        const choice = choices[Math.floor(Math.random() * 3)];
+        players.push({name, choice: choice.name, emoji: choice.emoji});
     }
 
-    function runGame() {
-        const count = document.getElementById("playerCount").value;
-        const resultsDiv = document.getElementById("results");
+    // Determine winners
+    const uniqueChoices = [...new Set(players.map(p => p.choice))];
 
-        resultsDiv.innerHTML = "";
+    let winners = [];
 
-        for (let i = 0; i < count; i++) {
-            const nameInput = document.getElementById("player" + i);
-            const name = nameInput.value || "Player " + (i + 1);
-            const randomChoice = choices[Math.floor(Math.random() * choices.length)];
+    if (uniqueChoices.length === 1) {
+        winnerText.innerText = "Draw! Everyone picked the same.";
+    }
+    else if (uniqueChoices.length === 3) {
+        winnerText.innerText = "Draw! All choices present.";
+    }
+    else {
+        let winningChoice;
 
-            const result = document.createElement("div");
-            result.className = "player-result";
-            result.innerHTML = `<strong>${name}</strong>: ${randomChoice}`;
-
-            resultsDiv.appendChild(result);
+        if (uniqueChoices.includes("Rock") && uniqueChoices.includes("Scissors")) {
+            winningChoice = "Rock";
+        } else if (uniqueChoices.includes("Scissors") && uniqueChoices.includes("Paper")) {
+            winningChoice = "Scissors";
+        } else if (uniqueChoices.includes("Paper") && uniqueChoices.includes("Rock")) {
+            winningChoice = "Paper";
         }
+
+        winners = players.filter(p => p.choice === winningChoice);
+        winnerText.innerText = winners.length > 1
+            ? "Winners: " + winners.map(w => w.name).join(", ")
+            : "Winner: " + winners[0].name;
     }
 
-    // Initialize inputs on load
-    generateInputs();
+    // Render results
+    players.forEach(p => {
+        const div = document.createElement("div");
+        div.className = "player";
+
+        if (winners.find(w => w.name === p.name)) {
+            div.classList.add("winner");
+        }
+
+        div.innerHTML = `<span>${p.name}</span><span>${p.emoji} ${p.choice}</span>`;
+        resultsDiv.appendChild(div);
+    });
+}
+
+// init
+generateInputs();
 </script>
 
 </body>
