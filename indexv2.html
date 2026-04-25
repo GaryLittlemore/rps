@@ -1,333 +1,224 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rock Paper Scissors - Random Allocator</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RPS Random Allocator</title>
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            min-height: 100vh;
-            padding: 40px 20px;
-            color: #fff;
-        }
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: white;
+    padding: 20px;
+}
 
-        h1 {
-            text-align: center;
-            margin-bottom: 10px;
-            font-size: 2.5rem;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-        }
+.container {
+    max-width: 500px;
+    margin: auto;
+}
 
-        .emoji-header {
-            text-align: center;
-            font-size: 3rem;
-            margin-bottom: 30px;
-        }
+h1 {
+    text-align: center;
+    margin-bottom: 10px;
+}
 
-        .controls {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 30px;
-        }
+.subtitle {
+    text-align: center;
+    opacity: 0.7;
+    margin-bottom: 20px;
+}
 
-        .player-count-section {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
+/* INPUT AREA */
+.card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
 
-        .player-count-section label {
-            font-size: 1.1rem;
-        }
+textarea {
+    width: 100%;
+    height: 120px;
+    border-radius: 10px;
+    border: none;
+    padding: 12px;
+    font-size: 1rem;
+    resize: none;
+}
 
-        .player-count-section input {
-            width: 80px;
-            padding: 10px;
-            font-size: 1.2rem;
-            text-align: center;
-            border: none;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #1a1a2e;
-        }
+button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+    cursor: pointer;
+    margin-top: 10px;
+}
 
-        .player-inputs {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 25px;
-        }
+button:hover {
+    transform: translateY(-2px);
+}
 
-        .player-input {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+/* RESULTS */
+.results {
+    display: none;
+}
 
-        .player-input label {
-            min-width: 80px;
-            font-weight: 500;
-        }
+.results.show {
+    display: block;
+    animation: fadeIn 0.4s ease;
+}
 
-        .player-input input {
-            flex: 1;
-            padding: 12px 15px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            background: rgba(255, 255, 255, 0.9);
-            color: #1a1a2e;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
+.result {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,0.07);
+    padding: 14px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+}
 
-        .player-input input:focus {
-            outline: none;
-            transform: scale(1.02);
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
-        }
+.result.winner {
+    border: 2px solid #22c55e;
+    background: rgba(34,197,94,0.15);
+}
 
-        .run-btn {
-            width: 100%;
-            padding: 15px 30px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #fff;
-            background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
+.choice {
+    font-size: 1.3rem;
+}
 
-        .run-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(233, 69, 96, 0.4);
-        }
+.winner-banner {
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
 
-        .run-btn:active {
-            transform: translateY(0);
-        }
-
-        .results {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 30px;
-            display: none;
-        }
-
-        .results.show {
-            display: block;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .results h2 {
-            text-align: center;
-            margin-bottom: 25px;
-            font-size: 1.8rem;
-        }
-
-        .result-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px 20px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            animation: slideIn 0.4s ease backwards;
-        }
-
-        .result-card:nth-child(1) { animation-delay: 0.1s; }
-        .result-card:nth-child(2) { animation-delay: 0.2s; }
-        .result-card:nth-child(3) { animation-delay: 0.3s; }
-        .result-card:nth-child(4) { animation-delay: 0.4s; }
-        .result-card:nth-child(5) { animation-delay: 0.5s; }
-        .result-card:nth-child(6) { animation-delay: 0.6s; }
-        .result-card:nth-child(7) { animation-delay: 0.7s; }
-        .result-card:nth-child(8) { animation-delay: 0.8s; }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .player-name {
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-
-        .choice {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.1rem;
-        }
-
-        .choice-emoji {
-            font-size: 2rem;
-        }
-
-        .choice-text {
-            text-transform: uppercase;
-            font-weight: 500;
-            letter-spacing: 1px;
-        }
-
-        .choice-text.rock { color: #a8dadc; }
-        .choice-text.paper { color: #ffd166; }
-        .choice-text.scissors { color: #ef476f; }
-
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            opacity: 0.6;
-            font-size: 0.9rem;
-        }
-    </style>
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(10px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+</style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>Rock Paper Scissors</h1>
-        <div class="emoji-header">🪨 📄 ✂️</div>
 
-        <div class="controls">
-            <div class="player-count-section">
-                <label for="playerCount">Number of Players:</label>
-                <input type="number" id="playerCount" min="2" max="10" value="2">
-            </div>
+<div class="container">
 
-            <div id="playerInputs" class="player-inputs"></div>
+<h1>🪨 📄 ✂️</h1>
+<div class="subtitle">Rock • Paper • Scissors Allocator</div>
 
-            <button class="run-btn" onclick="runGame()">🎲 Run</button>
-        </div>
+<div class="card">
+    <p>Enter player names (one per line):</p>
+    <textarea id="players">Alice
+Bob</textarea>
 
-        <div id="results" class="results">
-            <h2>Results</h2>
-            <div id="resultCards"></div>
-        </div>
-    </div>
+    <button onclick="runGame()">🎲 Run Game</button>
+</div>
 
-    <footer>
-        <p>Host this on GitHub Pages for free!</p>
-    </footer>
+<div id="results" class="results card">
+    <div id="winnerText" class="winner-banner"></div>
+    <div id="resultList"></div>
+</div>
 
-    <script>
-        const choices = [
-            { name: 'Rock', emoji: '🪨' },
-            { name: 'Paper', emoji: '📄' },
-            { name: 'Scissors', emoji: '✂️' }
-        ];
+</div>
 
-        const playerCountInput = document.getElementById('playerCount');
-        const playerInputsContainer = document.getElementById('playerInputs');
+<script>
+const choices = [
+    { name: 'Rock', emoji: '🪨' },
+    { name: 'Paper', emoji: '📄' },
+    { name: 'Scissors', emoji: '✂️' }
+];
 
-        function updatePlayerInputs() {
-            const count = Math.min(Math.max(parseInt(playerCountInput.value) || 2, 2), 10);
-            playerCountInput.value = count;
+function getWinner(results) {
+    const unique = [...new Set(results.map(r => r.choice.name))];
 
-            playerInputsContainer.innerHTML = '';
+    // Draw conditions
+    if (unique.length === 3 || unique.length === 1) {
+        return null;
+    }
 
-            for (let i = 1; i <= count; i++) {
-                const div = document.createElement('div');
-                div.className = 'player-input';
-                div.innerHTML = `
-                    <label for="player${i}">Player ${i}:</label>
-                    <input type="text" id="player${i}" placeholder="Enter name..." value="Player ${i}">
-                `;
-                playerInputsContainer.appendChild(div);
-            }
+    const winMap = {
+        Rock: 'Scissors',
+        Paper: 'Rock',
+        Scissors: 'Paper'
+    };
+
+    const winningChoice = unique.find(c =>
+        unique.every(other => c === other || winMap[c] === other)
+    );
+
+    return results.filter(r => r.choice.name === winningChoice);
+}
+
+function runGame() {
+    const input = document.getElementById('players').value;
+    const names = input.split('\n').map(n => n.trim()).filter(n => n);
+
+    if (names.length < 2) {
+        alert("Enter at least 2 players");
+        return;
+    }
+
+    const results = names.map(name => ({
+        name,
+        choice: choices[Math.floor(Math.random() * 3)]
+    }));
+
+    displayResults(results);
+}
+
+function displayResults(results) {
+    const container = document.getElementById('results');
+    const list = document.getElementById('resultList');
+    const winnerText = document.getElementById('winnerText');
+
+    list.innerHTML = '';
+
+    const winners = getWinner(results);
+
+    if (!winners) {
+        winnerText.innerHTML = "🤝 It's a draw!";
+    } else {
+        winnerText.innerHTML = "🏆 Winner: " + winners.map(w => w.name).join(', ');
+    }
+
+    results.forEach(r => {
+        const div = document.createElement('div');
+        div.className = 'result';
+
+        if (winners && winners.includes(r)) {
+            div.classList.add('winner');
         }
 
-        function runGame() {
-            const count = parseInt(playerCountInput.value) || 2;
-            const results = [];
+        div.innerHTML = `
+            <span>${escapeHtml(r.name)}</span>
+            <span class="choice">${r.choice.emoji} ${r.choice.name}</span>
+        `;
 
-            for (let i = 1; i <= count; i++) {
-                const nameInput = document.getElementById(`player${i}`);
-                const playerName = nameInput.value.trim() || `Player ${i}`;
-                const randomChoice = choices[Math.floor(Math.random() * choices.length)];
+        list.appendChild(div);
+    });
 
-                results.push({
-                    name: playerName,
-                    choice: randomChoice
-                });
-            }
+    container.classList.add('show');
+}
 
-            displayResults(results);
-        }
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>
 
-        function displayResults(results) {
-            const resultsContainer = document.getElementById('results');
-            const resultCardsContainer = document.getElementById('resultCards');
-
-            resultCardsContainer.innerHTML = '';
-
-            results.forEach((result, index) => {
-                const card = document.createElement('div');
-                card.className = 'result-card';
-                card.style.animationDelay = `${index * 0.1}s`;
-                card.innerHTML = `
-                    <span class="player-name">${escapeHtml(result.name)}</span>
-                    <div class="choice">
-                        <span class="choice-emoji">${result.choice.emoji}</span>
-                        <span class="choice-text ${result.choice.name.toLowerCase()}">${result.choice.name}</span>
-                    </div>
-                `;
-                resultCardsContainer.appendChild(card);
-            });
-
-            resultsContainer.classList.remove('show');
-            void resultsContainer.offsetWidth;
-            resultsContainer.classList.add('show');
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        playerCountInput.addEventListener('change', updatePlayerInputs);
-        playerCountInput.addEventListener('input', updatePlayerInputs);
-
-        updatePlayerInputs();
-    </script>
 </body>
 </html>
