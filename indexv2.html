@@ -108,8 +108,17 @@ button {
 
 .winner-banner {
     text-align: center;
-    margin-bottom: 10px;
-    font-size: 1.3rem;
+    margin-top: 20px;
+    font-size: 1.6rem;
+    font-weight: bold;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: all 0.5s ease;
+}
+
+.winner-banner.show {
+    opacity: 1;
+    transform: scale(1);
 }
 
 .fade {
@@ -136,8 +145,8 @@ button {
 </div>
 
 <div id="results" class="results card">
-    <div id="winnerText" class="winner-banner"></div>
     <div id="resultList"></div>
+    <div id="winnerText" class="winner-banner"></div>
 </div>
 
 </div>
@@ -152,6 +161,7 @@ const choices = [
 const select = document.getElementById('playerCount');
 const inputContainer = document.getElementById('playerInputs');
 
+// Populate dropdown
 for (let i = 2; i <= 20; i++) {
     const option = document.createElement('option');
     option.value = i;
@@ -190,6 +200,10 @@ function getWinner(results) {
     return results.filter(r => r.choice.name === winningChoice);
 }
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function runGame() {
     const inputs = inputContainer.querySelectorAll('input');
 
@@ -202,16 +216,15 @@ function runGame() {
     runTournament(players);
 }
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 async function runTournament(players) {
     const container = document.getElementById('results');
     const list = document.getElementById('resultList');
     const winnerText = document.getElementById('winnerText');
 
     list.innerHTML = '';
+    winnerText.textContent = '';
+    winnerText.classList.remove('show');
+
     container.classList.add('show');
 
     let round = 1;
@@ -239,7 +252,7 @@ async function runTournament(players) {
             continue;
         }
 
-        // Animate each player reveal
+        // Animate players
         for (const r of results) {
             const div = document.createElement('div');
             div.className = 'result';
@@ -259,7 +272,7 @@ async function runTournament(players) {
             div.classList.add('show');
         }
 
-        // Winner summary appears after
+        // Round winner at bottom
         const summary = document.createElement('div');
         summary.className = 'round-summary';
         summary.textContent = `➡️ Round Winner(s): ${winners.map(w => w.name).join(', ')}`;
@@ -274,9 +287,14 @@ async function runTournament(players) {
         round++;
     }
 
+    // 🎉 FINAL CHAMPION AT VERY BOTTOM
+    await sleep(500);
+
     winnerText.textContent = `🏆 Champion: ${players[0].name}`;
+    winnerText.classList.add('show');
 }
 
+// Safe output
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
