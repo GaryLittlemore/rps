@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RPS Random Allocator</title>
+<title>RPS Tournament</title>
 
 <style>
 * {
@@ -24,18 +24,15 @@ body {
     margin: auto;
 }
 
-h1 {
+h1, .subtitle {
     text-align: center;
-    margin-bottom: 10px;
 }
 
 .subtitle {
-    text-align: center;
     opacity: 0.7;
     margin-bottom: 20px;
 }
 
-/* INPUT AREA */
 .card {
     background: rgba(255,255,255,0.05);
     border-radius: 16px;
@@ -43,34 +40,27 @@ h1 {
     margin-bottom: 20px;
 }
 
-textarea {
+select, button {
     width: 100%;
-    height: 120px;
+    padding: 12px;
     border-radius: 10px;
     border: none;
-    padding: 12px;
     font-size: 1rem;
-    resize: none;
+    margin-top: 10px;
 }
 
 button {
-    width: 100%;
-    padding: 14px;
-    border: none;
-    border-radius: 12px;
     font-size: 1.2rem;
     font-weight: bold;
     background: linear-gradient(135deg, #22c55e, #16a34a);
     color: white;
     cursor: pointer;
-    margin-top: 10px;
 }
 
 button:hover {
     transform: translateY(-2px);
 }
 
-/* RESULTS */
 .results {
     display: none;
 }
@@ -99,10 +89,22 @@ button:hover {
     font-size: 1.3rem;
 }
 
+.round-title {
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    opacity: 0.85;
+}
+
 .winner-banner {
     text-align: center;
     margin-bottom: 15px;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
+}
+
+.fade {
+    opacity: 0.6;
+    font-style: italic;
 }
 
 @keyframes fadeIn {
@@ -117,14 +119,13 @@ button:hover {
 <div class="container">
 
 <h1>🪨 📄 ✂️</h1>
-<div class="subtitle">Rock • Paper • Scissors Allocator</div>
+<div class="subtitle">RPS Elimination Tournament</div>
 
 <div class="card">
-    <p>Enter player names (one per line):</p>
-    <textarea id="players">Alice
-Bob</textarea>
+    <label for="playerCount">Number of players:</label>
+    <select id="playerCount"></select>
 
-    <button onclick="runGame()">🎲 Run Game</button>
+    <button onclick="runGame()">🎲 Start Tournament</button>
 </div>
 
 <div id="results" class="results card">
@@ -141,13 +142,19 @@ const choices = [
     { name: 'Scissors', emoji: '✂️' }
 ];
 
+// Populate dropdown (2–20)
+const select = document.getElementById('playerCount');
+for (let i = 2; i <= 20; i++) {
+    const option = document.createElement('option');
+    option.value = i;
+    option.textContent = i + " players";
+    select.appendChild(option);
+}
+
 function getWinner(results) {
     const unique = [...new Set(results.map(r => r.choice.name))];
 
-    // Draw conditions
-    if (unique.length === 3 || unique.length === 1) {
-        return null;
-    }
+    if (unique.length !== 2) return null;
 
     const winMap = {
         Rock: 'Scissors',
@@ -163,60 +170,69 @@ function getWinner(results) {
 }
 
 function runGame() {
-    const input = document.getElementById('players').value;
-    const names = input.split('\n').map(n => n.trim()).filter(n => n);
+    const count = parseInt(select.value);
 
-    if (names.length < 2) {
-        alert("Enter at least 2 players");
-        return;
-    }
-
-    const results = names.map(name => ({
-        name,
-        choice: choices[Math.floor(Math.random() * 3)]
+    let players = Array.from({ length: count }, (_, i) => ({
+        name: `Player ${i + 1}`
     }));
 
-    displayResults(results);
+    runTournament(players);
 }
 
-function displayResults(results) {
+function runTournament(players) {
     const container = document.getElementById('results');
     const list = document.getElementById('resultList');
     const winnerText = document.getElementById('winnerText');
 
     list.innerHTML = '';
+    container.classList.add('show');
 
-    const winners = getWinner(results);
+    let round = 1;
 
-    if (!winners) {
-        winnerText.innerHTML = "🤝 It's a draw!";
-    } else {
-        winnerText.innerHTML = "🏆 Winner: " + winners.map(w => w.name).join(', ');
-    }
+    while (players.length > 1) {
 
-    results.forEach(r => {
-        const div = document.createElement('div');
-        div.className = 'result';
+        const results = players.map(p => ({
+            ...p,
+            choice: choices[Math.floor(Math.random() * 3)]
+        }));
 
-        if (winners && winners.includes(r)) {
-            div.classList.add('winner');
+        const winners = getWinner(results);
+
+        // Round title
+        const title = document.createElement('div');
+        title.className = 'round-title';
+        title.textContent = `Round ${round}`;
+        list.appendChild(title);
+
+        if (!winners) {
+            const draw = document.createElement('div');
+            draw.className = 'fade';
+            draw.textContent = "🤝 Draw — replaying round";
+            list.appendChild(draw);
+            continue;
         }
 
-        div.innerHTML = `
-            <span>${escapeHtml(r.name)}</span>
-            <span class="choice">${r.choice.emoji} ${r.choice.name}</span>
-        `;
+        results.forEach(r => {
+            const div = document.createElement('div');
+            div.className = 'result';
 
-        list.appendChild(div);
-    });
+            if (winners.includes(r)) {
+                div.classList.add('winner');
+            }
 
-    container.classList.add('show');
-}
+            div.innerHTML = `
+                <span>${r.name}</span>
+                <span class="choice">${r.choice.emoji} ${r.choice.name}</span>
+            `;
 
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+            list.appendChild(div);
+        });
+
+        players = winners.map(w => ({ name: w.name }));
+        round++;
+    }
+
+    winnerText.textContent = `🏆 Champion: ${players[0].name}`;
 }
 </script>
 
