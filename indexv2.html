@@ -40,13 +40,18 @@ h1, .subtitle {
     margin-bottom: 20px;
 }
 
-select, button {
+textarea, button {
     width: 100%;
     padding: 12px;
     border-radius: 10px;
     border: none;
     font-size: 1rem;
     margin-top: 10px;
+}
+
+textarea {
+    height: 140px;
+    resize: none;
 }
 
 button {
@@ -122,8 +127,9 @@ button:hover {
 <div class="subtitle">RPS Elimination Tournament</div>
 
 <div class="card">
-    <label for="playerCount">Number of players:</label>
-    <select id="playerCount"></select>
+    <label>Enter player names (one per line):</label>
+    <textarea id="players">Alice
+Bob</textarea>
 
     <button onclick="runGame()">🎲 Start Tournament</button>
 </div>
@@ -141,15 +147,6 @@ const choices = [
     { name: 'Paper', emoji: '📄' },
     { name: 'Scissors', emoji: '✂️' }
 ];
-
-// Populate dropdown (2–20)
-const select = document.getElementById('playerCount');
-for (let i = 2; i <= 20; i++) {
-    const option = document.createElement('option');
-    option.value = i;
-    option.textContent = i + " players";
-    select.appendChild(option);
-}
 
 function getWinner(results) {
     const unique = [...new Set(results.map(r => r.choice.name))];
@@ -170,11 +167,19 @@ function getWinner(results) {
 }
 
 function runGame() {
-    const count = parseInt(select.value);
+    const input = document.getElementById('players').value;
 
-    let players = Array.from({ length: count }, (_, i) => ({
-        name: `Player ${i + 1}`
-    }));
+    let names = input
+        .split('\n')
+        .map(n => n.trim())
+        .filter(n => n.length > 0);
+
+    if (names.length < 2 || names.length > 20) {
+        alert("Enter between 2 and 20 players");
+        return;
+    }
+
+    let players = names.map(name => ({ name }));
 
     runTournament(players);
 }
@@ -198,7 +203,6 @@ function runTournament(players) {
 
         const winners = getWinner(results);
 
-        // Round title
         const title = document.createElement('div');
         title.className = 'round-title';
         title.textContent = `Round ${round}`;
@@ -221,7 +225,7 @@ function runTournament(players) {
             }
 
             div.innerHTML = `
-                <span>${r.name}</span>
+                <span>${escapeHtml(r.name)}</span>
                 <span class="choice">${r.choice.emoji} ${r.choice.name}</span>
             `;
 
@@ -233,6 +237,13 @@ function runTournament(players) {
     }
 
     winnerText.textContent = `🏆 Champion: ${players[0].name}`;
+}
+
+// Safety for user input
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 </script>
 
