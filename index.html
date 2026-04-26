@@ -1,231 +1,305 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Rock, Paper, Scissors</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rock, Paper, Scissors</title>
 
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card: #1e293b;
-      --accent: #22c55e;
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-      --error: #ef4444;
-    }
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, sans-serif;
-    }
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: white;
+    padding: 20px;
+}
 
-    body {
-      background: linear-gradient(135deg, #020617, #0f172a);
-      color: var(--text);
-      display: flex;
-      justify-content: center;
-      padding: 30px 15px;
-    }
+.container {
+    max-width: 500px;
+    margin: auto;
+}
 
-    .app {
-      width: 100%;
-      max-width: 420px;
-      background: var(--card);
-      border-radius: 20px;
-      padding: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-    }
+h1, .subtitle {
+    text-align: center;
+}
 
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+.subtitle {
+    opacity: 0.7;
+    margin-bottom: 20px;
+}
 
-    input {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 999px;
-      border: none;
-      background: #020617;
-      color: var(--text);
-      font-size: 15px;
-      margin-bottom: 10px;
-    }
+.card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
 
-    input::placeholder {
-      color: var(--muted);
-    }
+select, input, button {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    margin-top: 10px;
+}
 
-    .buttons {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
+button {
+    font-size: 1.2rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+    cursor: pointer;
+}
 
-    button {
-      flex: 1;
-      padding: 12px;
-      border-radius: 999px;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-      transition: 0.2s;
-    }
+.results {
+    display: none;
+}
 
-    .primary {
-      background: var(--accent);
-      color: #022c22;
-    }
+.results.show {
+    display: block;
+}
 
-    .secondary {
-      background: #334155;
-      color: var(--text);
-    }
+.result {
+    display: flex;
+    justify-content: space-between;
+    background: rgba(255,255,255,0.07);
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+}
 
-    button:hover {
-      transform: translateY(-1px);
-      opacity: 0.9;
-    }
+.result.show {
+    opacity: 1;
+    transform: translateY(0);
+}
 
-    .error {
-      color: var(--error);
-      font-size: 13px;
-      text-align: center;
-      margin-top: 5px;
-    }
+.result.winner {
+    border: 2px solid #22c55e;
+    background: rgba(34,197,94,0.15);
+}
 
-    .players {
-      margin-top: 10px;
-    }
+.round-title {
+    margin-top: 15px;
+    font-weight: bold;
+}
 
-    .result {
-      margin-top: 20px;
-    }
+.round-summary {
+    margin-top: 5px;
+    margin-bottom: 10px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
 
-    .card {
-      background: #020617;
-      padding: 12px;
-      border-radius: 12px;
-      margin-bottom: 8px;
-      display: flex;
-      justify-content: space-between;
-    }
+.round-summary.show {
+    opacity: 1;
+}
 
-    .winner {
-      border: 1px solid var(--accent);
-    }
+.choice {
+    font-size: 1.2rem;
+}
 
-    .footer {
-      margin-top: 10px;
-      text-align: center;
-      font-weight: bold;
-    }
-  </style>
+.winner-banner {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 1.6rem;
+    font-weight: bold;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: all 0.5s ease;
+}
+
+.winner-banner.show {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.fade {
+    opacity: 0.6;
+    font-style: italic;
+}
+</style>
 </head>
 
 <body>
 
-<div class="app">
-  <h1>Rock, Paper, Scissors</h1>
+<div class="container">
 
-  <!-- Free text input -->
-  <input type="text" id="playerCount" inputmode="numeric" placeholder="Enter number of players">
+<h1>🪨 📄 ✂️</h1>
+<div class="subtitle">Rock, Paper, Scissors Tournament</div>
 
-  <div class="error" id="errorMsg"></div>
+<div class="card">
+    <label>Number of players:</label>
+    <select id="playerCount"></select>
 
-  <div class="players" id="players"></div>
+    <div id="playerInputs"></div>
 
-  <div class="buttons">
-    <button class="secondary" onclick="generatePlayers()">Setup</button>
-    <button class="primary" onclick="runGame()">Run</button>
-  </div>
+    <button onclick="runGame()">🎲 Start Tournament</button>
+</div>
 
-  <div class="result" id="results"></div>
+<div id="results" class="results card">
+    <div id="resultList"></div>
+    <div id="winnerText" class="winner-banner"></div>
+</div>
+
 </div>
 
 <script>
-  const choices = ["Rock", "Paper", "Scissors"];
+const choices = [
+    { name: 'Rock', emoji: '🪨' },
+    { name: 'Paper', emoji: '📄' },
+    { name: 'Scissors', emoji: '✂️' }
+];
 
-  function generatePlayers() {
-    const raw = document.getElementById("playerCount").value;
-    const count = parseInt(raw);
-    const errorMsg = document.getElementById("errorMsg");
-    const container = document.getElementById("players");
+const select = document.getElementById('playerCount');
+const inputContainer = document.getElementById('playerInputs');
 
-    container.innerHTML = "";
-    errorMsg.textContent = "";
+// Populate dropdown
+for (let i = 2; i <= 20; i++) {
+    const option = document.createElement('option');
+    option.value = i;
+    option.textContent = i + " players";
+    select.appendChild(option);
+}
 
-    if (isNaN(count) || count < 2) {
-      errorMsg.textContent = "Please enter a valid number (2 or more)";
-      return;
-    }
+select.addEventListener('change', generateInputs);
+generateInputs();
+
+function generateInputs() {
+    inputContainer.innerHTML = '';
+    const count = parseInt(select.value);
 
     for (let i = 0; i < count; i++) {
-      const input = document.createElement("input");
-      input.placeholder = "Player " + (i + 1);
-      container.appendChild(input);
+        const input = document.createElement('input');
+        input.placeholder = `Player ${i + 1}`;
+        inputContainer.appendChild(input);
     }
-  }
+}
 
-  function runGame() {
-    const inputs = document.querySelectorAll("#players input");
-    const resultsDiv = document.getElementById("results");
-    resultsDiv.innerHTML = "";
+function getWinner(results) {
+    const unique = [...new Set(results.map(r => r.choice.name))];
+    if (unique.length !== 2) return null;
 
-    if (inputs.length < 2) {
-      document.getElementById("errorMsg").textContent = "Create players first";
-      return;
-    }
+    const winMap = {
+        Rock: 'Scissors',
+        Paper: 'Rock',
+        Scissors: 'Paper'
+    };
+
+    const winningChoice = unique.find(c =>
+        unique.every(other => c === other || winMap[c] === other)
+    );
+
+    return results.filter(r => r.choice.name === winningChoice);
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function runGame() {
+    const inputs = inputContainer.querySelectorAll('input');
 
     let players = [];
-
     inputs.forEach((input, i) => {
-      const name = input.value || "Player " + (i + 1);
-      const choice = choices[Math.floor(Math.random() * 3)];
-      players.push({ name, choice });
+        const name = input.value.trim() || `Player ${i + 1}`;
+        players.push({ name });
     });
 
-    const unique = [...new Set(players.map(p => p.choice))];
-    let winners = [];
+    runTournament(players);
+}
 
-    if (unique.length === 2) {
-      if (unique.includes("Rock") && unique.includes("Scissors")) {
-        winners = players.filter(p => p.choice === "Rock");
-      }
-      if (unique.includes("Scissors") && unique.includes("Paper")) {
-        winners = players.filter(p => p.choice === "Scissors");
-      }
-      if (unique.includes("Paper") && unique.includes("Rock")) {
-        winners = players.filter(p => p.choice === "Paper");
-      }
+async function runTournament(players) {
+    const container = document.getElementById('results');
+    const list = document.getElementById('resultList');
+    const winnerText = document.getElementById('winnerText');
+
+    list.innerHTML = '';
+    winnerText.textContent = '';
+    winnerText.classList.remove('show');
+
+    container.classList.add('show');
+
+    let round = 1;
+
+    while (players.length > 1) {
+
+        const results = players.map(p => ({
+            ...p,
+            choice: choices[Math.floor(Math.random() * 3)]
+        }));
+
+        const winners = getWinner(results);
+
+        const title = document.createElement('div');
+        title.className = 'round-title';
+        title.textContent = `Round ${round}`;
+        list.appendChild(title);
+
+        if (!winners) {
+            const draw = document.createElement('div');
+            draw.className = 'fade';
+            draw.textContent = "🤝 Draw — replaying round";
+            list.appendChild(draw);
+            await sleep(1000);
+            continue;
+        }
+
+        // Animate players
+        for (const r of results) {
+            const div = document.createElement('div');
+            div.className = 'result';
+
+            if (winners.includes(r)) {
+                div.classList.add('winner');
+            }
+
+            div.innerHTML = `
+                <span>${escapeHtml(r.name)}</span>
+                <span class="choice">${r.choice.emoji} ${r.choice.name}</span>
+            `;
+
+            list.appendChild(div);
+
+            await sleep(300);
+            div.classList.add('show');
+        }
+
+        // Round winner at bottom
+        const summary = document.createElement('div');
+        summary.className = 'round-summary';
+        summary.textContent = `➡️ Round Winner(s): ${winners.map(w => w.name).join(', ')}`;
+        list.appendChild(summary);
+
+        await sleep(300);
+        summary.classList.add('show');
+
+        await sleep(1000);
+
+        players = winners.map(w => ({ name: w.name }));
+        round++;
     }
 
-    players.forEach(p => {
-      const div = document.createElement("div");
-      div.className = "card";
+    // 🎉 FINAL CHAMPION AT VERY BOTTOM
+    await sleep(500);
 
-      if (winners.includes(p)) {
-        div.classList.add("winner");
-      }
+    winnerText.textContent = `🏆 Champion: ${players[0].name}`;
+    winnerText.classList.add('show');
+}
 
-      div.innerHTML = `<span>${p.name}</span><span>${p.choice}</span>`;
-      resultsDiv.appendChild(div);
-    });
-
-    const footer = document.createElement("div");
-    footer.className = "footer";
-
-    if (winners.length === 0) {
-      footer.textContent = "Draw!";
-    } else {
-      footer.textContent = "Winner: " + winners.map(w => w.name).join(", ");
-    }
-
-    resultsDiv.appendChild(footer);
-  }
+// Safe output
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
 </script>
 
 </body>
