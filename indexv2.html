@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rock, Papar, Scissors</title>
+<title>RPS Tournament</title>
 
 <style>
 * {
@@ -62,7 +62,6 @@ button {
 
 .results.show {
     display: block;
-    animation: fadeIn 0.4s ease;
 }
 
 .result {
@@ -72,6 +71,14 @@ button {
     padding: 12px;
     border-radius: 10px;
     margin-bottom: 8px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+}
+
+.result.show {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .result.winner {
@@ -85,8 +92,14 @@ button {
 }
 
 .round-summary {
-    margin-bottom: 8px;
-    opacity: 0.85;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.round-summary.show {
+    opacity: 1;
 }
 
 .choice {
@@ -103,11 +116,6 @@ button {
     opacity: 0.6;
     font-style: italic;
 }
-
-@keyframes fadeIn {
-    from {opacity: 0; transform: translateY(10px);}
-    to {opacity: 1; transform: translateY(0);}
-}
 </style>
 </head>
 
@@ -116,7 +124,7 @@ button {
 <div class="container">
 
 <h1>🪨 📄 ✂️</h1>
-<div class="subtitle">Rock, Paper, Scissors Tournament</div>
+<div class="subtitle">Animated RPS Tournament</div>
 
 <div class="card">
     <label>Number of players:</label>
@@ -144,7 +152,6 @@ const choices = [
 const select = document.getElementById('playerCount');
 const inputContainer = document.getElementById('playerInputs');
 
-// Populate dropdown
 for (let i = 2; i <= 20; i++) {
     const option = document.createElement('option');
     option.value = i;
@@ -152,7 +159,6 @@ for (let i = 2; i <= 20; i++) {
     select.appendChild(option);
 }
 
-// Generate input boxes
 select.addEventListener('change', generateInputs);
 generateInputs();
 
@@ -196,7 +202,11 @@ function runGame() {
     runTournament(players);
 }
 
-function runTournament(players) {
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function runTournament(players) {
     const container = document.getElementById('results');
     const list = document.getElementById('resultList');
     const winnerText = document.getElementById('winnerText');
@@ -215,27 +225,22 @@ function runTournament(players) {
 
         const winners = getWinner(results);
 
-        // Round title
         const title = document.createElement('div');
         title.className = 'round-title';
         title.textContent = `Round ${round}`;
         list.appendChild(title);
 
-        // Summary line
-        const summary = document.createElement('div');
-        summary.className = 'round-summary';
-
         if (!winners) {
-            summary.textContent = "🤝 Draw — replaying round";
-            list.appendChild(summary);
+            const draw = document.createElement('div');
+            draw.className = 'fade';
+            draw.textContent = "🤝 Draw — replaying round";
+            list.appendChild(draw);
+            await sleep(1000);
             continue;
-        } else {
-            summary.textContent = `➡️ Round Winner(s): ${winners.map(w => w.name).join(', ')}`;
-            list.appendChild(summary);
         }
 
-        // Show each result
-        results.forEach(r => {
+        // Animate each player reveal
+        for (const r of results) {
             const div = document.createElement('div');
             div.className = 'result';
 
@@ -249,7 +254,21 @@ function runTournament(players) {
             `;
 
             list.appendChild(div);
-        });
+
+            await sleep(300);
+            div.classList.add('show');
+        }
+
+        // Winner summary appears after
+        const summary = document.createElement('div');
+        summary.className = 'round-summary';
+        summary.textContent = `➡️ Round Winner(s): ${winners.map(w => w.name).join(', ')}`;
+        list.appendChild(summary);
+
+        await sleep(300);
+        summary.classList.add('show');
+
+        await sleep(1000);
 
         players = winners.map(w => ({ name: w.name }));
         round++;
@@ -258,7 +277,6 @@ function runTournament(players) {
     winnerText.textContent = `🏆 Champion: ${players[0].name}`;
 }
 
-// XSS-safe
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
